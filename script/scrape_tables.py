@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Sep 11 13:32:25 2017
+Created on Tue Sep 12 12:35:2 2017
 Import data from various issues of 
  State Finance: A Study of Budgets 
 @author: subham-lenovo
@@ -12,6 +12,7 @@ import csv
 # delay request with sleep
 from time import sleep
 from time import time
+from time import ctime
 # mimic human behaviour by random delays
 from random import randint
 from IPython.core.display import clear_output
@@ -19,13 +20,16 @@ from warnings import warn
 
 # work dir
 print(os.getcwd())
-os.chdir('C:/Users/subham-lenovo/Documents/scrape_budget_data')
+os.chdir('C:/Projects/scrape_budget_data')
+# os.chdir('C:/Users/subham-lenovo/Documents/scrape_budget_data')
+ctime()
 
 # Create url list to parse
 base_url = 'https://rbi.org.in/Scripts/PublicationsView.aspx?id='
 page_url = []
+
 # 2001-02: revenue budget
-    # +1 for range to include upper interval
+#     +1 for range to include upper interval
 for i in range(3973, 4002):
     page_url.append(base_url+str(i))
 # 2001-02: capital budget    
@@ -147,8 +151,9 @@ try:
     os.remove('./output/raw_state_budget.csv')
 except OSError:
     pass #following lines will be executed regardless of exceptions
+
 # iterate over urls
-with open('./output/raw_state_budget.csv', 'a') as f:
+with open('./output/raw_state_budget.csv', mode ='a') as f:
     wr = csv.writer(f)
     for j in page_url:
         try:
@@ -156,7 +161,7 @@ with open('./output/raw_state_budget.csv', 'a') as f:
         except:
             continue # following lines won't get executed if exceptions arise
         # pause the loop
-        sleep(randint(8,15))
+        sleep(randint(2,6))
         # Monitor the requests
         req += 1
         elapsed_time = time() - start_time
@@ -173,11 +178,9 @@ with open('./output/raw_state_budget.csv', 'a') as f:
             
             for row in rows:
                 cols = row.find_all(['td'])
-                cols = [x.text.strip() for x in cols]
-                try:
-                    wr.writerow(cols)
-                except UnicodeEncodeError:
-                    pass
+                cols = [x.text.strip().encode('utf-8') for x in cols]
+                wr.writerow(cols)
+                
         except:
             pass
 
